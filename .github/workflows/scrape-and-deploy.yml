@@ -30,6 +30,9 @@ jobs:
       - name: Run scrapers
         env:
           NODE_ENV: production
+          # Optional: set these secrets in the repository if you need to route requests through a proxy
+          HTTP_PROXY: ${{ secrets.SCRAPER_HTTP_PROXY }}
+          HTTPS_PROXY: ${{ secrets.SCRAPER_HTTPS_PROXY }}
         run: npm run scrape
 
       - name: Setup Python
