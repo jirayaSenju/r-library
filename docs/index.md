@@ -1,6 +1,4 @@
-<!doctype html>
 <div class="archive-page">
-  <link rel="stylesheet" href="assets/css/style.css">
 
   <div class="archive-header">
     <div class="search-row">
@@ -12,6 +10,13 @@
     <div id="grid" class="grid"></div>
     <div id="pagination" class="pagination"></div>
   </main>
-  <header class="topbar">
-  </header>
+  <header class="topbar"></header>
 </div>
+
+<!--
+  Observações:
+  - O CSS e JS usados por esta página são carregados via `mkdocs.yml`
+    (propriedades `extra_css` e `extra_javascript`).
+  - Não inclua `<!doctype>`, `<head>` ou `<link>` aqui — o MkDocs injeta o conteúdo
+    dentro do template do tema e esse arquivo deve conter apenas o corpo da página.
+-->

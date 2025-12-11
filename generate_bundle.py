@@ -57,32 +57,8 @@ for fname in sorted(bundle.keys()):
 
     nav_entries.append({title: page_path})
 
-# write mkdocs.yml with nav entries
-mk = {
-    'site_name': 'Categorias',
-    'site_description': 'Arquivo de jogos — visualização por categoria',
-    'nav': nav_entries,
-    'theme': {'name': 'readthedocs'},
-    'extra_css': ['assets/css/style.css'],
-    'extra_javascript': ['assets/js/data-bundle.js', 'assets/js/app.js']
-}
-
-with mkdocs_path.open('w', encoding='utf-8') as m:
-    yaml = []
-    yaml.append(f"site_name: {mk['site_name']}")
-    yaml.append(f"site_description: {mk['site_description']}")
-    yaml.append('nav:')
-    for it in mk['nav']:
-        for k,v in it.items():
-            yaml.append(f"  - {k}: {v}")
-    yaml.append('theme:')
-    yaml.append(f"  name: {mk['theme']['name']}")
-    yaml.append('extra_css:')
-    for c in mk['extra_css']:
-        yaml.append(f"  - {c}")
-    yaml.append('extra_javascript:')
-    for j in mk['extra_javascript']:
-        yaml.append(f"  - {j}")
-    m.write('\n'.join(yaml) + '\n')
-
-print('Atualizado mkdocs.yml com', len(nav_entries)-1, 'categorias')
+print('Observação: este script gera docs/assets/js/data-bundle.js e as páginas em docs/categories/.')
+print('Ele não sobrescreve mais o mkdocs.yml — verifique se seu mkdocs.yml já contém:')
+print("  - nav entries para as páginas em docs/categories/")
+print("  - extra_css: assets/css/style.css (ou seu css custom)")
+print("  - extra_javascript: assets/js/data-bundle.js, assets/js/app.js")
