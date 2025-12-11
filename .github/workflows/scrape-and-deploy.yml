@@ -2,6 +2,11 @@ name: Scrape, Commit and Deploy
 
 on:
   workflow_dispatch:
+    inputs:
+      run_scrapers:
+        description: 'Run scrapers as part of this workflow? Set to "true" to enable.'
+        required: false
+        default: 'false'
   schedule:
     # daily at 02:00 UTC (adjust as needed)
     - cron: '0 2 * * *'
@@ -11,6 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      # Default comes from the workflow_dispatch input; for scheduled runs this will be 'false'
+      RUN_SCRAPERS: ${{ github.event.inputs.run_scrapers || 'false' }}
 
     steps:
       - name: Checkout repository
@@ -28,9 +36,18 @@ jobs:
           if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
       - name: Run scrapers
+        if: ${{ env.RUN_SCRAPERS == 'true' }}
         env:
           NODE_ENV: production
+          # Optional: set these secrets in the repository if you need to route requests through a proxy
+          HTTP_PROXY: ${{ secrets.SCRAPER_HTTP_PROXY }}
+          HTTPS_PROXY: ${{ secrets.SCRAPER_HTTPS_PROXY }}
         run: npm run scrape
+
+      - name: Skip scrapers (info)
+        if: ${{ env.RUN_SCRAPERS != 'true' }}
+        run: |
+          echo "Run scrapers is disabled for this run. To enable, trigger workflow with 'run_scrapers' = 'true' or set the input in the GitHub UI."
 
       - name: Setup Python
         uses: actions/setup-python@v4
