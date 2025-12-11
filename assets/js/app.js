@@ -11,7 +11,25 @@ let items = []
 let filtered = []
 let categoryCache = {} // filename -> items array
 let currentPage = 1
-const perPage = 20
+const perPage = 16
+// viewMode: 'grid' or 'list'
+let viewMode = (localStorage.getItem('r_library_view') || 'grid')
+
+function setViewMode(mode){
+  viewMode = (mode === 'list') ? 'list' : 'grid'
+  try{ localStorage.setItem('r_library_view', viewMode) }catch(e){}
+  if(GRID){
+    if(viewMode === 'list'){
+      GRID.classList.add('list-view')
+      GRID.classList.remove('grid')
+    }else{
+      GRID.classList.remove('list-view')
+      GRID.classList.add('grid')
+    }
+  }
+  // re-render to adjust layout
+  renderPage()
+}
 
 function formatCategoryName(filename){
   return filename.replace(/\.json$/,'').replace(/[-_]/g,' ').toUpperCase()
@@ -43,6 +61,9 @@ function renderPage(){
   if(GRID){
     GRID.classList.add('grid')
     GRID.style.gap = '20px'
+    // apply saved view mode
+    if(viewMode === 'list') GRID.classList.add('list-view')
+    else GRID.classList.remove('list-view')
   }
   GRID.innerHTML = ''
   const start = (currentPage-1)*perPage
@@ -60,6 +81,8 @@ function renderPage(){
   for(const it of pageItems){
     const card = document.createElement('div')
     card.className = 'card'
+    // make card keyboard-focusable for accessibility (shows title on focus)
+    card.tabIndex = 0
     // defensive: ensure the card doesn't span multiple columns or force min-width
     card.style.gridColumn = 'auto'
     card.style.minWidth = '0'
@@ -138,15 +161,32 @@ function renderPage(){
       wrap.appendChild(bcat)
     }
 
-    // do NOT append the meta block under the cover — the cover should occupy the entire card
+    // append image wrap
     card.appendChild(wrap)
     // append overlay after the wrap so it visually stacks above the image
     card.appendChild(overlay)
+    // append a small meta footer to balance the card layout (title is shown on hover via .cover-title)
+    const meta = document.createElement('div')
+    meta.className = 'meta'
+    const metaTitle = document.createElement('div')
+    metaTitle.className = 'title'
+    metaTitle.textContent = it.title || ''
+    meta.appendChild(metaTitle)
+    card.appendChild(meta)
 
     card.addEventListener('click', (e)=>{
       e.preventDefault()
       if(it.magnet){ window.location.href = it.magnet }
       else if(it.url){ window.open(it.url, '_blank') }
+    })
+
+    // allow Enter key to open the link when focused
+    card.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault()
+        if(it.magnet){ window.location.href = it.magnet }
+        else if(it.url){ window.open(it.url, '_blank') }
+      }
     })
 
     GRID.appendChild(card)
@@ -233,6 +273,37 @@ if (SEARCH_INPUT) {
         combined = combined.concat(arr)
       })
       combined.sort((a,b)=> new Date(b.scrapedAt) - new Date(a.scrapedAt))
+      filtered = combined.slice(0, 100)
+      currentPage = 1
+      // create view toggle in topbar
+      try{
+        const top = document.querySelector('.topbar')
+        if(top){
+          const wrapper = document.createElement('div')
+          wrapper.style.marginLeft = 'auto'
+          wrapper.style.display = 'flex'
+          wrapper.style.gap = '8px'
+
+          const btnGrid = document.createElement('button')
+          btnGrid.className = 'page-btn'
+          btnGrid.textContent = 'Grid'
+          btnGrid.title = 'Visualização em Grid'
+          btnGrid.addEventListener('click', ()=> setViewMode('grid'))
+
+          const btnList = document.createElement('button')
+          btnList.className = 'page-btn'
+          btnList.textContent = 'Lista'
+          btnList.title = 'Visualização em Lista'
+          btnList.addEventListener('click', ()=> setViewMode('list'))
+
+          wrapper.appendChild(btnGrid)
+          wrapper.appendChild(btnList)
+          top.appendChild(wrapper)
+        }
+      }catch(e){console.warn(e)}
+
+      // apply view mode and render
+      setViewMode(viewMode)
       filtered = combined.slice(0, 100)
       currentPage = 1
       renderPage()
