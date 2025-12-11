@@ -1,0 +1,56 @@
+/* Dark elegant theme overrides for MkDocs Material
+   - Set darker background, subtle card highlights
+   - Ensure responsiveness and align with our custom grid
+*/
+:root{
+  --site-bg: #0b0f14;
+  --panel-bg: #0f1720;
+  --muted-fg: #9aa4b2;
+  --card-bg: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04));
+  --accent: #38bdf8;
+}
+
+html,body{
+  background: var(--site-bg) !important;
+  color: #e6eef6 !important;
+}
+
+/* Material content area */
+.md-content, .wy-nav-content-wrap, .wy-nav-content{
+  background: transparent !important;
+  color: #e6eef6 !important;
+}
+
+/* Make page container wider on large screens but keep padding */
+.wy-nav-content { max-width: none !important; padding: 24px !important; }
+
+/* Sidebar styling adjustments */
+.wy-nav-side, .md-sidebar{ background: #0c1318 !important; border-right: 1px solid rgba(255,255,255,0.03) !important }
+.wy-side-scroll .current, .wy-nav .current{ color: var(--accent) !important }
+
+/* Our archive cards */
+.card{ background: var(--panel-bg) !important; box-shadow: 0 10px 30px rgba(2,6,12,0.6) !important; }
+.card .title{ color: #f3f7fb !important }
+.card .size, .badge{ color: var(--muted-fg) !important }
+
+/* Make content area have subtle inner container for cards */
+.archive-page main{ padding: 18px 12px !important }
+
+/* Responsive tweaks: reduce grid gaps on small screens */
+@media (max-width:780px){
+  .grid{ gap:12px !important }
+  .image-wrap{ aspect-ratio: 3/4 }
+}
+
+/* Tweak pagination and page buttons */
+.page-btn{ background: transparent; border: 1px solid rgba(255,255,255,0.04); color: var(--muted-fg) }
+.page-btn.active{ background: var(--accent); color: #042033 }
+
+/* Improve contrast for nav headings */
+.wy-side-nav-search input, .wy-menu{ color: #e6eef6 }
+
+/* Ensure our floating toggle stands out on dark bg */
+.sidebar-toggle{ background: var(--accent) !important; color: #042033 !important }
+
+/* Small helper: when sidebar collapsed, align the content padding */
+body.sidebar-collapsed .wy-nav-content{ padding-left: 18px !important }

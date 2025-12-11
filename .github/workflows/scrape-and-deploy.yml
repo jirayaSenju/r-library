@@ -1,0 +1,68 @@
+name: Scrape, Commit and Deploy
+
+on:
+  workflow_dispatch:
+  schedule:
+    # daily at 02:00 UTC (adjust as needed)
+    - cron: '0 2 * * *'
+
+jobs:
+  scrape-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Node dependencies
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - name: Run scrapers
+        env:
+          NODE_ENV: production
+        run: npm run scrape
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install MkDocs
+        run: |
+          python -m pip install --upgrade pip
+          pip install mkdocs mkdocs-material
+
+      - name: Generate docs bundle
+        run: python3 generate_bundle.py
+
+      - name: Commit scraped data and docs bundle
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data docs mkdocs.yml || true
+          if ! git diff --staged --quiet; then
+            git commit -m "chore(ci): update scraped data and docs bundle [skip ci]"
+            git push
+          else
+            echo "No changes to commit"
+          fi
+
+      - name: Build MkDocs site
+        run: mkdocs build -d site
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          publish_branch: gh-pages
