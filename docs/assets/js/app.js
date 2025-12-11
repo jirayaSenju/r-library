@@ -93,46 +93,121 @@ function renderPage(){
     // show skeleton loading state until image is loaded
     card.classList.add('loading')
 
-    const img = document.createElement('img')
-    img.alt = it.title || ''
-    img.loading = 'lazy'
-    img.decoding = 'async'
-    img.className = 'cover-img'
-    // try to load a higher-res (@2x) version for retina devices if available
-    function pickRetinaSrc(original, cb){
-      if(!original){ cb('https://via.placeholder.com/300x450?text=sem+imagem'); return }
-      const dpr = (window.devicePixelRatio) ? window.devicePixelRatio : 1
-      if(dpr > 1){
-        // insert @2x before file extension: cover.jpg -> cover@2x.jpg
-        try{
-          const m = original.match(/^(.*)(\.[a-zA-Z0-9]{2,5})(\?.*)?$/)
-          if(m){
-            const base = m[1]
-            const ext = m[2]
-            const qs = m[3] || ''
-            const candidate = base + '@2x' + ext + qs
-            const tester = new Image()
-            tester.onload = ()=> cb(candidate)
-            tester.onerror = ()=> cb(original)
-            tester.src = candidate
-            return
-          }
-        }catch(e){ /* fallthrough */ }
-      }
-      cb(original)
-    }
-
-    pickRetinaSrc(it.cover, (chosen)=>{
-      img.src = chosen
-    })
-    img.onerror = ()=>{ img.src = 'https://via.placeholder.com/300x450?text=sem+imagem' }
-    // remove loading when image finishes (or after timeout)
-    img.onload = ()=>{ card.classList.remove('loading') }
-    setTimeout(()=>{ if(card.classList.contains('loading')) card.classList.remove('loading') }, 2500)
-
+    // create an image-wrap and use background-image to render the cover.
+    // This avoids leaving an empty area when <img> fails to load and gives
+    // us finer control for fallback (show overlay title when no image).
     const wrap = document.createElement('div')
     wrap.className = 'image-wrap'
-    wrap.appendChild(img)
+    // ensure background covers the whole card
+    wrap.style.backgroundSize = 'cover'
+    wrap.style.backgroundPosition = 'center'
+    wrap.style.backgroundRepeat = 'no-repeat'
+    wrap.style.width = '100%'
+    wrap.style.height = '100%'
+
+    // Robust image loading strategy:
+    // 1) Try original URL (and https variant if original is http)
+    // 2) If original loads, set it as background. If DPR>1, attempt @2x in background and replace if succeeds.
+    // 3) If original fails, fallback to placeholder.
+    function tryLoadUrl(url, onload, onerror){
+      if(!url){ onerror(); return }
+      const t = new Image()
+      t.onload = ()=> { console.debug('image ok', url); onload(url) }
+      t.onerror = ()=> { console.warn('image failed', url); onerror(url) }
+      t.src = url
+    }
+
+    // Helper to extract hostname
+    function getHost(url){
+      try{ const u = new URL(url); return u.hostname }catch(e){ return null }
+    }
+
+    // whitelist of hosts where proxying is allowed/desired (to bypass hotlink protections)
+    const PROXY_WHITELIST = ['imageban.ru','i5.imageban.ru','i2.imageban.ru','i3.imageban.ru','i117.fastpic.org','fastpic.ru']
+
+    function loadBestImage(original){
+      if(!original){
+        // no original, use placeholder
+        wrap.style.backgroundImage = "url('https://via.placeholder.com/300x450?text=sem+imagem')"
+        card.classList.remove('loading')
+        card.classList.add('no-image')
+        return
+      }
+
+      // try original first
+      tryLoadUrl(original, (okUrl)=>{
+        console.debug('using original', original)
+        // set a neutral background color while image renders
+        wrap.style.backgroundColor = 'rgba(0,0,0,0.04)'
+        wrap.style.backgroundImage = `url('${okUrl}')`
+        card.classList.remove('loading')
+        card.classList.remove('no-image')
+
+        // NOTE: removed automatic @2x probing to avoid many 404s for servers
+        // that don't provide retina variants. If you want @2x support later,
+        // re-enable it conditionally per-host or via a configuration flag.
+      }, ()=>{
+        console.debug('original failed, attempting https fallback if applicable', original)
+        // original failed — if it was http, try https
+        if(original.startsWith('http://')){
+          const httpsUrl = original.replace(/^http:\/\//i, 'https://')
+          tryLoadUrl(httpsUrl, (ok)=>{ wrap.style.backgroundImage = `url("${ok}")`; card.classList.remove('loading'); card.classList.remove('no-image') }, ()=>{
+            console.warn('https fallback failed for', original)
+            // https also failed -> decide whether to try proxy based on host whitelist
+            try{
+              const host = getHost(original)
+              const allowed = host && PROXY_WHITELIST.some(h=> host.endsWith(h))
+              if(allowed){
+                console.debug('attempting proxy for host', host)
+                const proxied = 'https://images.weserv.nl/?url=' + encodeURIComponent(original.replace(/^https?:\/\//i,'')) + '&w=600'
+                tryLoadUrl(proxied, (okp)=>{ wrap.style.backgroundImage = `url('${okp}')`; card.classList.remove('loading'); card.classList.remove('no-image') }, ()=>{
+                  // proxy failed -> placeholder
+                  wrap.style.backgroundImage = "url('https://via.placeholder.com/300x450?text=sem+imagem')"
+                  card.classList.remove('loading')
+                  card.classList.add('no-image')
+                })
+              } else {
+                console.debug('host not whitelisted for proxy:', host)
+                wrap.style.backgroundImage = "url('https://via.placeholder.com/300x450?text=sem+imagem')"
+                card.classList.remove('loading')
+                card.classList.add('no-image')
+              }
+            }catch(e){
+              wrap.style.backgroundImage = "url('https://via.placeholder.com/300x450?text=sem+imagem')"
+              card.classList.remove('loading')
+              card.classList.add('no-image')
+            }
+          })
+        } else {
+          // direct fail -> try proxy only if whitelisted
+          try{
+            const host = getHost(original)
+            const allowed = host && PROXY_WHITELIST.some(h=> host.endsWith(h))
+            if(allowed){
+              const proxied = 'https://images.weserv.nl/?url=' + encodeURIComponent(original.replace(/^https?:\/\//i,'')) + '&w=600'
+              tryLoadUrl(proxied, (okp)=>{ wrap.style.backgroundImage = `url('${okp}')`; card.classList.remove('loading'); card.classList.remove('no-image') }, ()=>{
+                wrap.style.backgroundImage = "url('https://via.placeholder.com/300x450?text=sem+imagem')"
+                card.classList.remove('loading')
+                card.classList.add('no-image')
+              })
+            } else {
+              wrap.style.backgroundImage = "url('https://via.placeholder.com/300x450?text=sem+imagem')"
+              card.classList.remove('loading')
+              card.classList.add('no-image')
+            }
+          }catch(e){
+            wrap.style.backgroundImage = "url('https://via.placeholder.com/300x450?text=sem+imagem')"
+            card.classList.remove('loading')
+            card.classList.add('no-image')
+          }
+        }
+      })
+    }
+
+    loadBestImage(it.cover)
+
+    // fail-safe: after timeout remove skeleton and mark as no-image
+    setTimeout(()=>{ if(card.classList.contains('loading')){ card.classList.remove('loading'); card.classList.add('no-image') } }, 2500)
 
     // overlay title: hidden by default, shown on hover (visible on small screens)
     const overlay = document.createElement('div')
@@ -235,7 +310,8 @@ if (SEARCH_INPUT) {
 
 // init: prefer bundle
 ;(function init(){
-  if(window.__GAME_DATA__){
+  // Prefer bundle injected at build time
+  if(window.__GAME_DATA__ && Object.keys(window.__GAME_DATA__).length > 0){
     // window.__GAME_DATA__ keys are filenames
     manifest = Object.keys(window.__GAME_DATA__)
     manifest.forEach(f => {
@@ -260,17 +336,30 @@ if (SEARCH_INPUT) {
       currentPage = 1
       renderPage()
     }
-  }else{
-    // fallback: try fetching manifest.json (not ideal for MkDocs static bundle)
-    fetch('data/manifest.json').then(r=>r.json()).then(m=>{
-      manifest = m
-      populateCategories()
-      // lazy load counts
-      m.forEach(async (f)=>{
-        try{ const r = await fetch('data/'+f); const a = await r.json(); a.sort((x,y)=> new Date(y.scrapedAt)-new Date(x.scrapedAt)); categoryCache[f]=a; updateCategoryCounts() }catch(e){console.warn(e)}
-      })
-    }).catch(e=>{ console.warn('manifest fetch failed', e); populateCategories() })
+    return
   }
+
+  // If bundle exists but is empty, or bundle wasn't injected, show a friendly message
+  if(window.__GAME_DATA__ && Object.keys(window.__GAME_DATA__).length === 0){
+    const hint = document.createElement('div')
+    hint.className = 'no-results'
+    hint.innerHTML = '<strong>Nenhum dado foi carregado.</strong><br>Execute <code>python3 generate_bundle.py</code> com os arquivos JSON em <code>data/</code> para gerar <code>docs/assets/js/data-bundle.js</code>.';
+    if(GRID) GRID.innerHTML = '';
+    if(GRID) GRID.appendChild(hint);
+    if(PAGINATION) PAGINATION.innerHTML = '';
+    return;
+  }
+
+  // fallback: try fetching manifest.json (not ideal for MkDocs static bundle)
+  fetch('data/manifest.json').then(r=>r.json()).then(m=>{
+    manifest = m
+    populateCategories()
+    // lazy load counts
+    m.forEach(async (f)=>{
+      try{ const r = await fetch('data/'+f); const a = await r.json(); a.sort((x,y)=> new Date(y.scrapedAt)-new Date(x.scrapedAt)); categoryCache[f]=a; updateCategoryCounts() }catch(e){console.warn(e)}
+    })
+  }).catch(e=>{ console.warn('manifest fetch failed', e); populateCategories() })
+  
 })()
 ;
 // Note: grid columns are controlled via CSS (style.css) with !important rules

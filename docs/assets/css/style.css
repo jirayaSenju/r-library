@@ -1,0 +1,63 @@
+/* Minimal site stylesheet for MkDocs extras */
+html,body{height:100%}
+body{font-family:Inter,Roboto,Helvetica,Arial,sans-serif;margin:0;background:#0f1724;color:#e6eef6}
+.site-header{background:transparent}
+.site-nav{background:transparent}
+.site-footer{color:#9aa4b2}
+
+.md-content #grid, #grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr)) !important;gap:18px}
+.card{background:transparent;border-radius:8px;padding:0;overflow:hidden;position:relative;aspect-ratio:3/4;display:block;cursor:pointer;border:0;box-shadow:none}
+.image-wrap{width:100%;height:100%;display:block;padding:0;margin:0;border:0}
+.card img, .image-wrap img{width:100% !important;height:100% !important;object-fit:cover !important;display:block !important;border-radius:inherit !important;border:0 !important;margin:0 !important;padding:0 !important;background:transparent !important}
+
+/* Aggressive overrides to remove any theme-introduced spacing/borders */
+.card, .card > *, .image-wrap, .image-wrap > *, .md-card, .md-card__inner, .md-grid__item, .md-content .md-card, .md-content .md-card .md-card__inner{
+	padding:0 !important;
+	margin:0 !important;
+	border:0 !important;
+	box-shadow:none !important;
+	background:transparent !important;
+}
+
+/* Ensure pseudo elements don't create visible borders */
+.card::before, .card::after, .md-card::before, .md-card::after{display:none !important;content:none !important}
+.card .meta{display:none}
+
+/* Title overlay */
+.cover-title{position:absolute;left:0;right:0;bottom:0;padding:12px;background:linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,0.80));color:#fff;font-size:0.95rem;white-space:normal;line-height:1.2;border-bottom-left-radius:8px;border-bottom-right-radius:8px;opacity:0;transform:translateY(100%);transition:opacity .16s ease,transform .16s ease;z-index:10;padding-left:14px;padding-right:14px}
+.card:hover .cover-title, .card:focus-within .cover-title{opacity:1;transform:translateY(0)}
+.cover-title strong{font-weight:600;display:block;margin-bottom:6px}
+.cover-title small{color:rgba(255,255,255,0.85);font-weight:400}
+
+/* When image is a placeholder, show darker/light background and black title for readability */
+.card.no-image .cover-title{color:#000 !important;background:linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,0.92)) !important;opacity:1 !important;transform:translateY(0) !important}
+.card.no-image .cover-title small{color:rgba(0,0,0,0.85) !important}
+
+/* Remove any theme-introduced inner borders/margins for card containers */
+.md-content .md-card, .md-card, .md-content .md-card .md-card__inner{padding:0;margin:0;border:0;background:transparent;box-shadow:none}
+
+.search-row input{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:rgba(7,16,36,0.6);color:inherit}
+
+/* Pagination styles */
+.pagination{display:flex;gap:8px;justify-content:center;align-items:center;padding:12px;margin:18px 0}
+.page-btn{padding:8px 10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--md-muted, #9aa4b2);cursor:pointer;min-width:40px}
+.page-btn:hover{background:rgba(255,255,255,0.02);color:#fff}
+.page-btn:disabled{opacity:0.45;cursor:default}
+.page-btn.active{background:var(--md-accent, #38bdf8);color:#042033;border-color:rgba(255,255,255,0.08)}
+
+/* Responsive breakpoints to reduce columns on smaller screens */
+@media (max-width:1400px){
+	.md-content #grid, #grid{grid-template-columns:repeat(5,minmax(0,1fr)) !important}
+}
+@media (max-width:1100px){
+	.md-content #grid, #grid{grid-template-columns:repeat(4,minmax(0,1fr)) !important}
+}
+@media (max-width:900px){
+	.md-content #grid, #grid{grid-template-columns:repeat(3,minmax(0,1fr)) !important}
+}
+@media (max-width:700px){
+	.md-content #grid, #grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+}
+@media (max-width:480px){
+	.md-content #grid, #grid{grid-template-columns:repeat(1,minmax(0,1fr)) !important}
+}

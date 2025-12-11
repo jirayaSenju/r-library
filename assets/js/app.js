@@ -97,6 +97,12 @@ function renderPage(){
     }
 
     pickRetinaSrc(it.cover, (chosen)=>{
+      // normaliza URLs: transforma protocol-relative e http em https
+      try{
+        if(!chosen) chosen = ''
+        if(chosen.startsWith('//')) chosen = 'https:' + chosen
+        else if(chosen.startsWith('http://')) chosen = chosen.replace('http://', 'https://')
+      }catch(e){ /* ignore */ }
       img.src = chosen
     })
     img.onerror = ()=>{ img.src = 'https://via.placeholder.com/300x450?text=sem+imagem' }

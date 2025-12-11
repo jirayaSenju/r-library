@@ -29,18 +29,9 @@ theme:
   name: material
   language: pt
   palette:
-    - scheme: slate
-      primary: teal
-      accent: cyan
-      toggle:
-        icon: material/weather-sunny
-        name: Alternar para tema claro
-    - scheme: default
-      primary: teal
-      accent: cyan
-      toggle:
-        icon: material/weather-night
-        name: Alternar para tema escuro
+    scheme: slate
+    primary: teal
+    accent: cyan
   font:
     text: Inter
     code: Roboto Mono
