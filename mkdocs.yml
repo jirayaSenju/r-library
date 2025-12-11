@@ -1,0 +1,51 @@
+site_name: R Library
+site_description: Arquivo de jogos — visualização por categoria
+nav:
+  - ALL: index.md
+  - 3DS: categories/3ds.md
+  - DREAMCAST: categories/dreamcast.md
+  - DS: categories/ds.md
+  - GAMECUBE: categories/gamecube.md
+  - PS2: categories/ps2.md
+  - PS3: categories/ps3.md
+  - PS4: categories/ps4.md
+  - PS5: categories/ps5.md
+  - PSP: categories/psp.md
+  - PSVITA: categories/psvita.md
+  - PSX: categories/psx.md
+  - SWITCH: categories/switch.md
+  - WII: categories/wii.md
+  - WIIU: categories/wiiu.md
+  - WINDOWS ARCADE: categories/windows-arcade.md
+  - WINDOWS FIGHT: categories/windows-fight.md
+  - WINDOWS FIRST PERSON: categories/windows-first-person.md
+  - WINDOWS HORROR: categories/windows-horror.md
+  - WINDOWS RPG: categories/windows-rpg.md
+  - WINDOWS RTS: categories/windows-rts.md
+  - WINDOWS THIRD PERSON: categories/windows-third-person.md
+  - XBOX360: categories/xbox360.md
+theme:
+  name: material
+  language: pt
+  palette:
+    - scheme: slate
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/weather-sunny
+        name: Alternar para tema claro
+    - scheme: default
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/weather-night
+        name: Alternar para tema escuro
+  font:
+    text: Inter
+    code: Roboto Mono
+extra_css:
+  - assets/css/dark-theme.css
+  - assets/css/style.css
+extra_javascript:
+  - assets/js/data-bundle.js
+  - assets/js/app.js

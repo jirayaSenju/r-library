@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Categorias - Categorias</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>Categorias</h1>
+      </div>
+
+      <div class="controls">
+        <div class="category-block">
+          <div class="lbl">Categorias</div>
+          <ul id="categoryList" class="category-list"></ul>
+        </div>
+
+        <div class="search-block">
+          <div class="lbl">Buscar</div>
+          <input id="searchInput" type="search" placeholder="Buscar por título em todas as categorias..." />
+        </div>
+      </div>
+    </aside>
+
+    <div class="content">
+      <header class="topbar">
+        <div class="topbar-title">Explore por categoria</div>
+      </header>
+
+      <main>
+        <div id="grid" class="grid"></div>
+        <div id="pagination" class="pagination"></div>
+      </main>
+
+      <footer class="footer">Gerado por um site estático. Deploy no GitHub Pages.</footer>
+    </div>
+  </div>
+
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
