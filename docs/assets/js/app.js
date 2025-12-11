@@ -1,5 +1,31 @@
 // app.js adapted to use window.__GAME_DATA__ when available (MkDocs bundle)
-const SEARCH_INPUT = document.getElementById('searchInput')
+// locate a single search input on the page: prefer explicit `#searchInput`,
+// otherwise try common selectors used by MkDocs Material and fall back to
+// the first visible input[type=search] with a Portuguese placeholder.
+let SEARCH_INPUT = null
+function findSearchInput(){
+  const byId = document.getElementById('searchInput')
+  if(byId) return byId
+  const selectors = [
+    'input.md-search__input',
+    'input.md-header-search__input',
+    'header input[type="search"]',
+    'input[type="search"].md-search-input',
+    'input[type="search"]'
+  ]
+  for(const sel of selectors){
+    const el = document.querySelector(sel)
+    if(el) return el
+  }
+  // try placeholder match (Portuguese)
+  const all = Array.from(document.querySelectorAll('input[type="search"], input'))
+  for(const el of all){
+    const ph = (el.getAttribute('placeholder')||'').toLowerCase()
+    if(ph.includes('buscar') || ph.includes('buscar por')) return el
+  }
+  return null
+}
+SEARCH_INPUT = findSearchInput()
 const GRID = document.getElementById('grid')
 const PAGINATION = document.getElementById('pagination')
 
@@ -202,6 +228,9 @@ if (SEARCH_INPUT) {
     clearTimeout(searchDebounce)
     searchDebounce = setTimeout(()=> applySearch(e.target.value), 250)
   })
+} else {
+  // if no search input found, log a helpful warning
+  console.warn('search input not found — search disabled (no #searchInput or theme search found)')
 }
 
 // init: prefer bundle

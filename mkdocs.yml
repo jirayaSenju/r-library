@@ -1,5 +1,6 @@
-site_name: Categorias
+site_name: R Library
 site_description: Arquivo de jogos — visualização por categoria
+site_url: https://jirayasenju.github.io/r-library
 nav:
   - Home: index.md
   - 3DS: categories/3ds.md
@@ -25,9 +26,29 @@ nav:
   - WINDOWS THIRD PERSON: categories/windows-third-person.md
   - XBOX360: categories/xbox360.md
 theme:
-  name: readthedocs
+  name: material
+  language: pt
+  palette:
+    - scheme: slate
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/weather-sunny
+        name: Alternar para tema claro
+    - scheme: default
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/weather-night
+        name: Alternar para tema escuro
+  font:
+    text: Inter
+    code: Roboto Mono
 extra_css:
+  - assets/css/dark-theme.css
   - assets/css/style.css
 extra_javascript:
   - assets/js/data-bundle.js
   - assets/js/app.js
+
+use_directory_urls: false

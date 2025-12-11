@@ -2,7 +2,7 @@
 
   <div class="archive-header">
     <div class="search-row">
-      <input id="searchInput" type="search" placeholder="Buscar por título em todas as categorias..." />
+      <!-- Search is provided by the site header (single search bar). Removed duplicate page search. -->
     </div>
   </div>
 
